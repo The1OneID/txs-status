@@ -2,7 +2,7 @@ import logging
 import math
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pprint import pprint
 
 import requests
@@ -51,8 +51,8 @@ class TransactionFetcher:
 
     def is_timestamp_within_range(self, timestamp_microseconds):
         timestamp_seconds = timestamp_microseconds / 1_000_000
-        timestamp_datetime = datetime.fromtimestamp(timestamp_seconds)
-        current_datetime = datetime.now()
+        timestamp_datetime = datetime.fromtimestamp(timestamp_seconds, timezone.utc)
+        current_datetime = datetime.now(timezone.utc)
         x_days_ago = current_datetime - timedelta(days=self.MAX_TXS_AGE_IN_DAYS)
         return timestamp_datetime >= x_days_ago
 
