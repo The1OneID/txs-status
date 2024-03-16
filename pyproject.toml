@@ -1,0 +1,39 @@
+[project]
+name = "Pull Txs"
+readme = "README.md"
+requires-python = ">=3.12"
+
+[tool.black]
+line-length = 119
+target-version = ["py312"]
+extend-exclude = '''(manage.py|settings.py|asgi.py|wsgi.py|urls.py|migrations/*)'''
+
+[tool.ruff]
+line-length = 119
+# Dont fix anything
+fixable = []
+exclude = [
+    "migrations", #django migrations
+    "settings.py",
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv"
+]

@@ -1,0 +1,29 @@
+version: "3"
+services:
+  app:
+    build:
+      context: .
+    restart: unless-stopped
+    volumes:
+      - ./:/app
+    command: >
+      sh -c "python transactions_fetcher.py"
+  web:
+    build: .
+    restart: unless-stopped
+    volumes:
+      - ./:/app
+    expose:
+      - 8888
+    depends_on:
+      - app
+    command: uvicorn fastapi_server:app --host 0.0.0.0 --port 8888
+  nginx:
+    image: nginx:latest
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - web
