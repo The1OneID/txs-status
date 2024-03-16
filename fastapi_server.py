@@ -11,14 +11,13 @@ import settings
 
 app = FastAPI()
 
-origins = settings.COR_ORIGINS
 
 # Add CORSMiddleware to the application
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # Allow all origins
+    allow_origins=settings.COR_ORIGINS,  # Allow all origins
     allow_credentials=True,
-    allow_methods=["GET"],  # Allow all methods
+    allow_methods=["*"],  # Allow all methods
     allow_headers=["*"],  # Allow all headers
 )
 
