@@ -18,8 +18,8 @@ FETCHING_INTERVAL_IN_SEC = settings.FETCHING_INTERVAL_IN_SEC
 
 
 class TransactionFetcher:
-    GRAPHQL_ENDPOINT = "https://api.0l.fyi/graphql"
-    RPC_TXS_BY_LEDGER_ENDPOINT = "https://rpc.0l.fyi/v1/transactions/by_version/"
+    GRAPHQL_ENDPOINT = settings.GRAPHQL_ENDPOINT
+    RPC_TXS_BY_LEDGER_ENDPOINT = settings.RPC_TXS_BY_LEDGER_ENDPOINT
     TXS_LIMIT_PER_PAGE = settings.TXS_LIMIT_PER_PAGE
     MAX_RETRIES = settings.MAX_RETRIES
     RETRY_BACKOFF = settings.RETRY_BACKOFF
@@ -69,7 +69,7 @@ class TransactionFetcher:
             except requests.exceptions.HTTPError as e:
                 if e.response.status_code in (429,) or 500 <= e.response.status_code < 600:
                     if attempt < self.MAX_RETRIES:
-                        wait_time = self.RETRY_BACKOFF**attempt
+                        wait_time = self.RETRY_BACKOFF ** attempt
                         logging.warning(f"Request {url} failed, retrying in {wait_time} seconds...")
                         time.sleep(wait_time)
                         continue
@@ -142,9 +142,9 @@ class TransactionFetcher:
                 data = future.result()
                 tx_metadata = data["items"][0]
                 if not (
-                    tx_metadata["functionName"] == "transfer"
-                    and tx_metadata["success"]
-                    and self.is_timestamp_within_range(tx_metadata["timestamp"])
+                        tx_metadata["functionName"] == "transfer"
+                        and tx_metadata["success"]
+                        and self.is_timestamp_within_range(tx_metadata["timestamp"])
                 ):
                     num_ignored_txs += 1
                     logging.info(f"Ignored txs: {num_ignored_txs}")
