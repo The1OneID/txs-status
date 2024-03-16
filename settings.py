@@ -7,9 +7,11 @@ load_dotenv()
 DB_FILE_PATH = os.getenv("DB_FILE_PATH", "transactions.db")
 FETCHING_INTERVAL_IN_SEC = int(os.getenv("FETCHING_INTERVAL_IN_SEC", 180))
 API_STATIC_TOKEN = os.getenv("API_STATIC_TOKEN", "")
-COR_ORIGINS = os.getenv("COR_ORIGINS", [])
+COR_ORIGINS = os.getenv("COR_ORIGINS")
 if COR_ORIGINS:
     COR_ORIGINS = [item.strip() for item in COR_ORIGINS.split(',')]
+else:
+    COR_ORIGINS = ["*"]
 
 TXS_LIMIT_PER_PAGE = int(os.getenv("TXS_LIMIT_PER_PAGE", 200))
 MAX_RETRIES = int(os.getenv("MAX_RETRIES", 5))
