@@ -69,7 +69,7 @@ class TransactionFetcher:
             except requests.exceptions.HTTPError as e:
                 if e.response.status_code in (429,) or 500 <= e.response.status_code < 600:
                     if attempt < self.MAX_RETRIES:
-                        wait_time = self.RETRY_BACKOFF ** attempt
+                        wait_time = self.RETRY_BACKOFF**attempt
                         logging.warning(f"Request {url} failed, retrying in {wait_time} seconds...")
                         time.sleep(wait_time)
                         continue
@@ -128,22 +128,13 @@ class TransactionFetcher:
         total_txs = self.query_transactions_with_retry(0, 1)["size"]
         total_pages = math.ceil(total_txs / self.TXS_LIMIT_PER_PAGE)
         all_transactions = []
-
-        with ThreadPoolExecutor(max_workers=self.MAX_THREADS) as executor:
-            futures = [
-                executor.submit(
-                    self.query_transactions_with_retry, page * self.TXS_LIMIT_PER_PAGE, self.TXS_LIMIT_PER_PAGE
-                )
-                for page in range(total_pages)
-            ]
-            num_ignored_txs = 0
-            total_txs = 0
-            for i, future in enumerate(as_completed(futures)):
-                data = future.result()
-                all_transactions.extend(data["items"])
-                logging.info(f"Page requests: {i + 1}/{total_pages}")
-            total_txs += len(all_transactions)
-            logging.info(f"Total txs: {total_txs}")
+        for page in range(total_pages):
+            data = self.query_transactions_with_retry(page * self.TXS_LIMIT_PER_PAGE, self.TXS_LIMIT_PER_PAGE)
+            # assuming txs are sorted desc by timestamp, no need to check next pages
+            if not self.is_timestamp_within_range(data["items"][0]["timestamp"]):
+                break
+            all_transactions.extend(data["items"])
+            logging.info(f"Page requests: {page + 1}/{total_pages}")
 
         relevant_transactions = [
             tx
@@ -163,6 +154,9 @@ class TransactionFetcher:
                     detailed_transactions.append(details)
             for i, future in enumerate(as_completed(futures)):
                 details = future.result()
+                # if int(details["amount"]) < settings.MIN_TX_AMOUNT:
+                #     logging.info(f"Skipping txs {details} due to min amount filter")
+                #     continue
                 detailed_transactions.append(details)
                 self.__txs_details[tx_hash] = details
                 logging.info(f"Transaction details fetched: {i + 1}/{len(relevant_transactions)}")
